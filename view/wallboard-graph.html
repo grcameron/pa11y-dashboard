@@ -1,0 +1,223 @@
+{{!
+This file is part of Pa11y Dashboard.
+
+Pa11y Dashboard is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Pa11y Dashboard is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Pa11y Dashboard.  If not, see http://www.gnu.org/licenses/.
+}}
+<!DOCTYPE html>
+<html lang="{{lang}}" class="no-javascript">
+<head>
+	<meta charset="utf-8"/>
+	<title>Pa11y Wallboard</title>
+	<meta name="description" content="Pa11y Wallboard"/>
+
+	{{#if noindex}}
+	<meta name="robots" content="noindex"/>
+	{{/if}}
+
+	<link rel="icon" type="image/png" href="favicon.png"/>
+
+	<!-- For mobile devices. -->
+	<meta name="viewport" content="width=device-width"/>
+
+	<script src="https://d3js.org/d3.v5.min.js"></script>
+
+	<style type="text/css">
+		:root {
+			--error: #ed4b35;
+			--warning: #8b8b38;
+			--notice: #28628b;
+		}
+
+		* {
+			box-sizing: border-box;
+		}
+
+		body {
+			background: #3d3c3c;
+			padding: 0;
+			margin: 0;
+			font-family: Inconsolata, monospace;
+			color: #ada8a8;
+		}
+
+		html, body, #container {
+			height: 100%;
+		}
+
+		.header {
+			width: 100%;
+			text-align: center;
+		}
+
+		#container {
+			width: 100%;
+			display: grid;
+			grid-template-columns: 100%;
+			grid-template-rows: 80% 20%;
+		}
+
+		#graph {
+			width: 100%;
+			height: 100%;
+		}
+
+		#labels {
+			margin: 0;
+		}
+
+		li {
+			display: inline-block;
+			padding-left: 8px;
+			font-size: 2rem;
+		}
+
+		li:before {
+			content: '\2022';
+			margin-right: 2px;
+		}
+
+
+		.axis {
+			color: #ada8a8;
+			stroke-width: 2;
+			font-size: 1.4rem;
+		}
+
+		path {
+			fill: none;
+			stroke-width: 2;
+		}
+
+		.legend {
+			font-size: 2rem;
+		}
+	</style>
+</head>
+
+<body>
+
+<header class="header">
+	<h1 class="header__text">Converged Accessbility Errors</h1>
+</header>
+
+<div id="container">
+	<svg id="graph"></svg>
+	<ul id="labels"></ul>
+</div>
+
+<script>
+	console.log('hey');
+	const data = {{{data}}};
+
+
+	// Set the dimensions of the canvas / graph
+	const margin = {top: 10, right: 50, bottom: 35, left: 60};
+	const containerDimensions = document.getElementById('graph').getBoundingClientRect();
+
+	console.log(containerDimensions);
+
+	const width = document.getElementById('graph').clientWidth - margin.left - margin.right;
+	const height = Math.floor(containerDimensions.height) - margin.top - margin.bottom;
+
+	// Parse the date / time
+
+	data.forEach(result => {
+		result.date = new Date(result.date);
+	});
+
+	data.sort((a, b) => {
+		return a.date > b.date ?
+				1
+				: a.date < b.date ?
+						-1
+						: 0;
+	});
+
+	const timeDomain = d3.extent(data, result => result.date);
+	timeDomain[1] = new Date(timeDomain[1].valueOf()).setDate(timeDomain[1].getDate() + 4);
+
+	// Set the ranges
+	const x = d3.scaleTime()
+			.domain(d3.extent(data, result => result.date))
+			.range([0, width]);
+
+	const y = d3.scaleLinear()
+			.domain([0, d3.max(data, result => result.errors) + 1])
+			.range([height, 0])
+
+	// Define the line
+	const line = d3.line()
+			.x(result => x(result.date))
+			.y(result => y(result.errors));
+
+	// Adds the svg canvas
+	const svg = d3.select('#graph')
+			.attr('width', width + margin.left + margin.right)
+			.attr('height', height + margin.top + margin.bottom)
+			.append('g')
+			.attr('transform',
+					'translate(' + margin.left + ',' + margin.top + ')');
+
+	const labels = d3.select('#labels');
+
+	// Nest the entries by symbol
+	const dataNest = d3.nest()
+			.key(result => result.name)
+			.entries(data);
+
+	// set the colour scale
+	const color = d3.scaleOrdinal(d3.schemeCategory10);
+
+	legendSpace = width / dataNest.length; // spacing for the legend
+
+	// Loop through each symbol / key
+	dataNest.forEach((nest, index) => {
+
+		svg.append('path')
+				.attr('class', 'line')
+				.style('stroke', color(nest.key))
+				.attr('d', line(nest.values));
+
+		// Add the Legend
+		labels.append('li')
+				.style('color', color(nest.key))
+				.text(nest.key);
+
+	});
+
+	// Add the X Axis
+	svg.append('g')
+			.attr('class', 'axis')
+			.attr('transform', 'translate(0,' + height + ')')
+			.call(d3.axisBottom(x));
+
+	// Add the Y Axis
+	svg.append('g')
+			.attr('class', 'axis')
+			.call(d3.axisLeft(y));
+
+	svg.selectAll('.dot')
+			.data(data)
+			.enter().append('circle')
+			.attr('class', 'dot')
+			.attr('cx', result =>  x(result.date))
+			.attr('cy', result => y(result.errors))
+			.style('fill', result => color(result.name))
+			.attr('r', 5)
+
+</script>
+
+
+</body>
+</html>

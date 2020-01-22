@@ -1,0 +1,196 @@
+{{!
+This file is part of Pa11y Dashboard.
+
+Pa11y Dashboard is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Pa11y Dashboard is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Pa11y Dashboard.  If not, see
+<http://www.gnu.org/licenses/>.
+}}
+<!DOCTYPE html>
+<html lang="{{lang}}" class="no-javascript">
+<head>
+	<meta charset="utf-8"/>
+	<title>Pa11y Wallboard</title>
+	<meta name="description" content="Pa11y Wallboard"/>
+
+	{{#if noindex}}
+	<meta name="robots" content="noindex"/>
+	{{/if}}
+
+	<link rel="icon" type="image/png" href="favicon.png"/>
+
+	<!-- For mobile devices. -->
+	<meta name="viewport" content="width=device-width"/>
+
+	<style type="text/css">
+		:root {
+			--error: #ed4b35;
+			--warning: #8b8b38;
+			--notice: #28628b;
+		}
+
+		* {
+			box-sizing: border-box;
+		}
+
+		body {
+			background: #3d3c3c;
+			padding: 0;
+			margin: 0;
+			font-family: Inconsolata, monospace;
+			color: #ada8a8;
+		}
+
+		.header {
+			width: 100%;
+			text-align: center;
+		}
+
+		.groups {
+			margin: 5px;
+			display: flex;
+			flex-wrap: wrap;
+			align-content: space-around;
+		}
+
+		.task {
+			background: #2a2929;
+			margin: 0 5px 1%;
+			width: 16%;
+		}
+
+		.task__header {
+			color: #fff;
+			width: 100%;
+			padding: 0 5px 0 5px;
+			min-height: 55px;
+		}
+
+		.task__header__group-name {
+			font-size: 1em;
+			margin: 0;
+			color: #ada8a8;
+			border-radius: 4px;
+			padding: 0 2px 0 2px
+		}
+
+		.task__header__name {
+			margin: 0;
+		}
+
+		.task--error {
+			border-top: 4px solid var(--error);
+		}
+
+		.task--warning {
+			border-top: 4px solid var(--warning);
+		}
+
+		.task--notice {
+			border-top: 4px solid var(--notice);
+		}
+
+		.task--none {
+			border-top: 4px solid #11c560;
+		}
+
+		.task__counts {
+			width: 100%;
+			display: flex;
+		}
+
+		.count {
+			width: 33.333%;
+			display: inline-block;
+			line-height: 40px;
+			text-align: center;
+			font-size: 1.5em;
+			color: white;
+		}
+
+		.count--error {
+			background: var(--error);
+		}
+
+		.count--warning {
+			background: var(--warning);
+		}
+
+		.count--notice {
+			background: var(--notice);
+		}
+
+		.group-name--1 {
+			background: #0069c5;
+			color: #fff;
+		}
+
+		.group-name--2 {
+			background: #6c757d;
+			color: #fff;
+		}
+
+		.group-name--3 {
+			background: #268942;
+			color: #fff;
+		}
+
+		.group-name--4 {
+			background: #b12f3d;
+			color: #fff;
+		}
+
+		.group-name--5 {
+			background: #b88707;
+			color: #fff;
+		}
+
+		.group-name--0 {
+			background: #fff;
+			color: #000;
+		}
+	</style>
+</head>
+
+<body>
+
+<header class="header">
+	<h1 class="header__text">Accessibility</h1>
+</header>
+
+<section class="groups">
+	{{#each groups}}
+	{{#each tasks}}
+	<div class="task task--{{overallState}}">
+		<div class="task__header">
+			<h2 class="task__header__name">{{name}}</h2>
+
+			{{#unless ../defaultGroup}}
+			<h1 class="task__header__group-name group-name--{{../index}}">
+				{{../groupName}}
+			</h1>
+			{{/unless}}
+		</div>
+		{{#last_result}}
+		<div class="task__counts">
+			<div class="count count--error">{{count.error}}</div>
+			<div class="count count--warning">{{count.warning}}</div>
+			<div class="count count--notice">{{count.notice}}</div>
+		</div>
+		{{/last_result}}
+	</div>
+	{{/each}}
+	{{/each}}
+</section>
+
+</body>
+</html>

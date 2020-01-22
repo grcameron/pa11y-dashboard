@@ -26,6 +26,7 @@ const pkg = require('./package.json');
 module.exports = initApp;
 
 // Initialise the application
+// eslint-disable-next-line max-statements
 function initApp(config, callback) {
 	config = defaultConfig(config);
 
@@ -92,6 +93,7 @@ function initApp(config, callback) {
 
 	// Load routes
 	require('./route/index')(app);
+	require('./route/wallboard')(app);
 	require('./route/task/index')(app);
 	require('./route/result/download')(app);
 	if (!config.readonly) {
