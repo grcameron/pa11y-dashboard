@@ -32,6 +32,25 @@ function taskState(counts) {
 	return 'none';
 }
 
+function getGroupName(taskName) {
+	const parts = taskName.split(':');
+	if (parts.length >= 2) {
+		return parts[0];
+	}
+	return 'noAreaDefined';
+}
+
+function groupBy(objectArray, property) {
+	return objectArray.reduce((acc, obj) => {
+		const key = obj[property];
+		if (!acc[key]) {
+			acc[key] = [];
+		}
+		acc[key].push(obj);
+		return acc;
+	}, {});
+}
+
 // Route definition
 function route(app) {
 	app.express.get('/wallboard', (request, response, next) => {
@@ -105,15 +124,39 @@ function route(app) {
 				}, {});
 
 				const modifiedResults = results.map(result => ({
-					date: result.date,
+					date: result.date.split('T')[0],
 					errors: result.count.error,
 					warnings: result.count.warning,
-					notices: result.count.notices,
-					name: tasksLookup[result.task].name
+					notices: result.count.notice,
+					name: tasksLookup[result.task].name,
+					group: getGroupName(tasksLookup[result.task].name)
 				}));
 
+				let finalResults = [];
+				for (const result of modifiedResults) {
+					if(finalResults.filter(finalResult => (finalResult.name === result.group && finalResult.date === result.date)).length > 0)
+					{
+						finalResults.find(x => x.name === result.group && x.date === result.date).errors += result.errors;
+						finalResults.find(x => x.name === result.group && x.date === result.date).warnings += result.warnings;
+						finalResults.find(x => x.name === result.group && x.date === result.date).notices += result.notices;
+					}
+					else
+					{
+						// create new object
+						finalResults.push({
+							date: result.date.split('T')[0],
+							errors: result.errors,
+							warnings: result.warnings,
+							notices: result.notices,
+							name: result.group
+						});
+					}
+				}
+
+				// Break down this further into groups name: x
+				// take the latest date, return total counts
 				response.render('wallboard-graph', {
-					data: JSON.stringify(modifiedResults),
+					data: JSON.stringify(finalResults),
 					layout: false
 				});
 			});

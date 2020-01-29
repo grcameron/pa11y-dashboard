@@ -15,9 +15,7 @@ You should have received a copy of the GNU General Public License
 along with Pa11y Dashboard.  If not, see <http://www.gnu.org/licenses/>.
 }}
 {{#content "title"}}Pa11y Dashboard{{/content}}
-
 <div data-control="task-list">
-
   <div class="clearfix">
     <div class="col-md-6 col-md-offset-3 filter-toggle no-js-hide text-center">
       <label for="task-filter" class="filter-trigger" data-toggle="collapse" data-target="#filter-input">Filter<span class="glyphicon glyphicon-filter"></span>
@@ -48,5 +46,7 @@ along with Pa11y Dashboard.  If not, see <http://www.gnu.org/licenses/>.
   {{/deleted}}
 
   {{> tasks}}
-
+	<a href="/download-all-latest" class="btn-full-width btn btn-default" data-test="download-csv">
+		Download CSV (For All Last Run Tasks) <span class="glyphicon glyphicon-download" aria-hidden="true"></span>
+	</a>
 </div>
